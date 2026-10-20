@@ -27,32 +27,84 @@ FORCE = "--force" in sys.argv
 SKIP_DIRS = {".venv", "venv", "site-packages", ".ipynb_checkpoints", "_raw", "__pycache__", "__MACOSX", ".git"}
 SKIP_FILES = {"desktop.ini", ".DS_Store"}
 
-# course -> modules. "key" matches note file prefix and the .docx name prefix.
-COURSES = [
-    {"id": "C6", "title": "Advanced Machine Learning", "dir": "C6 - Advanced Machine Learning", "modules": [
-        {"key": "C6_M1", "folders": ["05-SVM-and-Naive-Bayes"]},
-        {"key": "C6_M2", "folders": ["07-Regularisation-and-Hyperparameter-Tuning"]},
-        {"key": "C6_Assignment_1", "folders": ["08-Model-Selection"]},
-        {"key": "C6_M3", "folders": ["12-Time-Series"]},
-        {"key": "C6_M4", "folders": ["13-Recommendation-Systems"]},
-    ]},
-    {"id": "C7", "title": "Deep Learning for Generative AI", "dir": "C7 - Deep Learning for Generative AI", "modules": [
-        {"key": "C7_M1", "folders": ["14-Deep Learning for Generative AI"]},
-        {"key": "C7_M2", "folders": []},
-        {"key": "C7_M3", "folders": ["notebooks"]},
-        {"key": "C7_M4", "folders": []},
-        {"key": "C7_Assignment", "folders": []},
-    ]},
-    {"id": "C8", "title": "Designing GenAI Systems", "dir": "C8 - Designing GenAI Systems", "modules": [
-        {"key": "C8_M1", "folders": []},
-        {"key": "C8_M2", "folders": ["15-Module Downloads"]},
-        {"key": "C8_M3", "folders": ["Material - Model Adaptation, Fine-Tuning and Evaluation", "QLoRA and DPO Notebooks"]},
-        {"key": "C8_M4", "folders": ["Module Downloads", "Starter and Dataset RAG Legal"]},
-    ]},
-    {"id": "C9", "title": "Agentic AI Systems", "dir": "C9 - Agentic AI Systems", "locked": True, "modules": []},
+# Topic plan, in learning order. Each topic: title, optional one-line blurb, links and notebook folders.
+# A link is (label, source, anchor-prefix): source is a notes_md key (e.g. "C6_M1") or "ext:<name>" for
+# tools/topic_notes/<name>.md. The anchor prefix is matched against that note's heading ids ("14-" -> "14-why-svms"),
+# so split cards deep-link into one note file without renaming it.
+EXT = REPO / "tools" / "topic_notes"
+EXT_TAG = "Extra reading, not from the course"
+GROUPS = [
+    ("Foundations", "foundations", [
+        {"t": "Linear Regression", "f": ["01-Linear-Regression"]},
+        {"t": "Logistic Regression", "f": ["02-Logistic-Regression"]},
+        {"t": "Decision Trees", "f": ["03-Decision-Trees"]},
+        {"t": "Ensembles", "f": ["04-Ensembles"]},
+        {"t": "Gradient Boosting and XGBoost", "n": [("Notes", "ext:gradient-boosting", "")], "x": 1},
+        {"t": "Clustering", "f": ["06-Clustering"]},
+        {"t": "PCA and Dimensionality Reduction", "n": [("Notes", "ext:pca-dimensionality-reduction", "")], "x": 1},
+        {"t": "Neural Networks", "f": ["09-Neural-Networks"]},
+        {"t": "Backprop and Optimisers", "n": [("Notes", "ext:backprop-and-optimisers", "")], "x": 1},
+        {"t": "CNN", "f": ["10-CNN"]},
+        {"t": "NLP Basics", "f": ["11-NLP"]},
+    ]),
+    ("Classical ML", "classical", [
+        {"t": "Bias, Variance and Overfitting", "n": [("Notes", "C6_M1", "11-")]},
+        {"t": "Regularisation (L1 and L2)", "n": [("Notes", "ext:regularisation", "")], "x": 1},
+        {"t": "SVM", "n": [("Notes", "C6_M1", "14-")], "f": ["05-SVM-and-Naive-Bayes"]},
+        {"t": "Kernels", "n": [("Notes", "C6_M1", "21-")]},
+        {"t": "Naive Bayes", "n": [("Notes", "C6_M1", "31-")]},
+        {"t": "Evaluation Metrics", "n": [("Notes", "ext:evaluation-metrics", "")], "x": 1},
+        {"t": "Model Selection and Tuning", "n": [("Notes", "C6_M2", "11-")], "f": ["07-Regularisation-and-Hyperparameter-Tuning"]},
+        {"t": "Feature Selection", "n": [("Notes", "C6_M2", "18-")]},
+        {"t": "Class Imbalance", "n": [("Notes", "C6_M2", "28-")]},
+        {"t": "Model Selection in Practice: Cardio Risk", "n": [("Notes", "C6_Assignment_1", "")], "f": ["08-Model-Selection"]},
+        {"t": "Association Rules", "n": [("Notes", "C6_M2", "31-")]},
+        {"t": "Explainable AI", "n": [("Notes", "C6_M2", "41-")]},
+        {"t": "Time Series", "n": [("Notes", "C6_M3", "11-")], "f": ["12-Time-Series"]},
+        {"t": "Recommendation Systems", "n": [("Notes", "C6_M4", "11-")], "f": ["13-Recommendation-Systems"]},
+    ]),
+    ("Computer Vision", "vision", [
+        {"t": "Image Processing", "n": [("Notes", "C7_M1", "11-")], "f": ["14-Deep Learning for Generative AI"]},
+        {"t": "Object Detection", "n": [("Notes", "C7_M1", "21-")]},
+        {"t": "Transfer Learning", "n": [("Notes", "C7_M1", "31-")]},
+        {"t": "Transfer Learning in Practice: Surface Defects", "n": [("Notes", "C7_Assignment", "")]},
+        {"t": "Encoder-Decoder and U-Net", "n": [("Notes", "C7_M1", "41-")]},
+    ]),
+    ("Language Models", "language", [
+        {"t": "RNN, LSTM and GRU", "n": [("Notes", "ext:rnn-lstm-gru", "")], "x": 1},
+        {"t": "Embeddings and Search Basics", "n": [("Notes", "C7_M2", "11-"), ("Search", "C8_M4", "01-")]},
+        {"t": "Seq2Seq and Attention", "n": [("Notes", "C7_M2", "13-")]},
+        {"t": "Transformers", "n": [("Notes", "C7_M2", "21-")]},
+        {"t": "Transformer Variants: BERT, T5, SBERT", "n": [("Notes", "C7_M2", "31-")]},
+    ]),
+    ("Generative Models", "generative", [
+        {"t": "Variational Autoencoders", "n": [("Notes", "C7_M3", "11-")], "f": ["notebooks"]},
+        {"t": "GANs and CycleGAN", "n": [("Notes", "C7_M3", "21-")]},
+        {"t": "Diffusion Models", "n": [("Notes", "C7_M3", "31-")]},
+        {"t": "Multimodal Models: CLIP and VLMs", "n": [("Notes", "C7_M3", "41-")]},
+        {"t": "Vision Transformers", "n": [("Notes", "C7_M3", "51-")]},
+    ]),
+    ("GenAI Systems", "systems", [
+        {"t": "GenAI Landscape", "n": [("Notes", "C8_M1", "11-")]},
+        {"t": "Prompt Engineering", "n": [("Full guide", "ext:prompt-engineering", ""),
+                                          ("System prompting", "C8_M1", "21-"), ("Multimodal prompting", "C8_M1", "31-")], "x": 1},
+        {"t": "LLM APIs and Tool Calling", "n": [("Notes", "C8_M2", "11-")], "f": ["15-Module Downloads"]},
+        {"t": "LangChain and Frameworks", "n": [("Notes", "C8_M2", "21-")]},
+        {"t": "Fine-Tuning: LoRA and QLoRA", "n": [("Notes", "C8_M3", "11-")], "f": ["Material - Model Adaptation, Fine-Tuning and Evaluation"]},
+        {"t": "Alignment: RLHF and DPO", "n": [("Notes", "C8_M3", "21-")], "f": ["QLoRA and DPO Notebooks"]},
+        {"t": "RAG Foundations", "n": [("Notes", "C8_M4", "11-")], "f": ["Module Downloads"]},
+        {"t": "LlamaIndex and Advanced RAG", "n": [("LlamaIndex", "C8_M4", "31-"), ("Advanced RAG", "C8_M4", "41-")], "f": ["Starter and Dataset RAG Legal"]},
+        {"t": "LLM Evaluation, Reliability and Observability", "n": [("Notes", "C8_M3", "41-"), ("Red-teaming", "C8_M1", "41-")]},
+    ]),
+    ("Responsible AI", "responsible", [
+        {"t": "Hallucination", "n": [("Notes", "C7_M4", "21-")]},
+        {"t": "Prompt Injection and Jailbreaks", "n": [("Notes", "C7_M4", "31-")]},
+        {"t": "Responsible AI Metrics", "n": [("Notes", "C7_M4", "11-")]},
+    ]),
+    ("Agentic AI", "agentic", [
+        {"t": "Agentic AI", "locked": True},
+    ]),
 ]
-PRE_C6 = ["01-Linear-Regression", "02-Logistic-Regression", "03-Decision-Trees", "04-Ensembles",
-          "06-Clustering", "09-Neural-Networks", "10-CNN", "11-NLP"]
 
 
 def esc(s):
@@ -168,49 +220,60 @@ def file_rows(folder: Path, hub_dir: Path):
 
 
 def find_note(key):
+    if key.startswith("ext:"):
+        f = EXT / (key[4:] + ".md")
+        return f if f.exists() else None
     m = sorted(NOTES.glob(f"{key}*.md"))
     return m[0] if m else None
 
 
-def find_docx(course_dir: Path, key):
-    prefix = key.replace("_", " ")
-    for f in sorted(course_dir.glob("*.docx")):
-        if f.name.startswith(prefix):
-            return f
-    return None
+def note_href(key, prefix, title, hub_dir: Path):
+    """Render the note (if needed) and return its href, deep-linked to the first heading id starting with prefix."""
+    note = find_note(key)
+    if not note:
+        return None
+    dst = OUT / "notes" / (note.stem + ".html")
+    render_md(note, dst, title)
+    href = rel(dst, hub_dir)
+    if prefix:
+        m = re.search(r'id="(%s[^"]*)"' % re.escape(prefix), dst.read_text(encoding="utf-8"))
+        if m:
+            href += "#" + m.group(1)
+    return href
 
 
-def module_block(mod, course_dir: Path, hub_dir: Path):
-    note = find_note(mod["key"])
-    docx = find_docx(course_dir, mod["key"])
-    title = titleize(note.stem[len(mod["key"]):]) if note else titleize(mod["key"])
-    if "Assignment" in mod["key"]:
-        title += " (assignment)"
-    label = ""
+def topic_block(t, hub_dir: Path):
+    title = t["t"]
+    if t.get("locked"):
+        return (f'<article class="card sh-mod" data-s="{esc(title.lower())}"><h3 class="card-title">{esc(title)}</h3>'
+                '<p class="sh-none">Coming soon.</p></article>')
     links = []
-    if note:
-        dst = OUT / "notes" / (note.stem + ".html")
-        render_md(note, dst, title)
-        links.append(f'<a class="btn btn-secondary" href="{rel(dst, hub_dir)}">Notes</a>')
-    if docx:
-        links.append(f'<a class="btn btn-ghost" href="{rel(docx, hub_dir)}">.docx</a>')
+    for label, key, prefix in t.get("n", []):
+        href = note_href(key, prefix, title, hub_dir)
+        if href:
+            links.append(f'<a class="btn btn-secondary" href="{href}">{esc(label)}</a>')
     mats, count = "", 0
-    for fo in mod["folders"]:
+    for fo in t.get("f", []):
         p = AIML / fo
         if p.is_dir():
             h, c = file_rows(p, hub_dir)
             mats += f'<div class="sh-folder">{esc(re.sub(r"^\d+-", "", fo))}</div>{h}'
             count += c
-    det = (f'<details><summary>{count} notebooks / files</summary>{mats}</details>' if count
-           else '<p class="sh-none">No loose notebooks or files (conceptual).</p>')
-    search = esc(f"{title} {mods_text(mod)}".lower())
+    if count:
+        det = f'<details><summary>{count} notebooks / files</summary>{mats}</details>'
+    elif not links:
+        det = '<p class="sh-none">Coming soon.</p>'
+    else:
+        det = ""
+    tag = f'<span class="tag tag-outline">{EXT_TAG}</span>' if t.get("x") else ""
+    search = esc(f"{title} {mods_text(t)}".lower())
     return (f'<article class="card sh-mod" data-s="{search}">'
-            f'<h3 class="card-title">{esc(title)}</h3><div class="sh-links">{"".join(links)}</div>{det}</article>')
+            f'<h3 class="card-title">{esc(title)}</h3>{tag}<div class="sh-links">{"".join(links)}</div>{det}</article>')
 
 
-def mods_text(mod):
+def mods_text(t):
     out = []
-    for fo in mod["folders"]:
+    for fo in t.get("f", []):
         p = AIML / fo
         if p.is_dir():
             out += [f.stem for f in walk(p) if f.suffix.lower() in (".ipynb", ".pdf")]
@@ -228,40 +291,21 @@ def build():
             dst = OUT / "notes" / (src.stem + ".html")
             render_md(src, dst, name)
             quick.append(f'<a class="btn btn-primary" href="{rel(dst, hub_dir)}">{name}</a>')
-    # remaining notes not covered by a module (safety net)
+    # every course note is rendered, since topic cards deep-link into them
     for n in sorted(NOTES.glob("*.md")):
         render_md(n, OUT / "notes" / (n.stem + ".html"), titleize(re.sub(r"^C\d_(M\d_|Assignment_?\d*_?)?", "", n.stem)))
 
-    def sect(sid, cid, title, cards, tag=""):
-        return (f'<section class="sh-course" id="{sid}"><div class="sh-chead"><h2>{esc(title)}</h2>{tag}</div><div class="sh-grid">{"".join(cards)}</div></section>')
-
     sections, navl = [], []
-    for c in COURSES:
-        cdir = ROOT / c["dir"]
-        cards = [module_block(m, cdir, hub_dir) for m in c["modules"]]
-        if c.get("locked") and not any(walk(cdir)):
-            cards = ['<p class="sh-none">Locked. No materials yet. Re-run the build once this course opens.</p>']
-            tag = '<span class="tag tag-outline">Locked</span>'
-        else:
-            tag = '<span class="tag tag-accent">Complete</span>'
-        sections.append(sect(c["id"], c["id"], c["title"], cards, tag))
-        navl.append((c["id"], c["title"]))
-    pre = []
-    for fo in PRE_C6:
-        p = AIML / fo
-        if not p.is_dir():
-            continue
-        h, n = file_rows(p, hub_dir)
-        name = titleize(re.sub(r"^\d+-", "", fo))
-        s_ = esc(f"{name} {mods_text({'folders': [fo]})}".lower())
-        pre.append(f'<article class="card sh-mod" data-s="{s_}"><h3 class="card-title">{esc(name)}</h3>'
-                   f'<details><summary>{n} notebooks / files</summary>{h}</details></article>')
-    sections.append(sect("pre", "Pre", "Earlier topics: notebooks only", pre, '<span class="tag tag-neutral">No refined notes</span>'))
-    navl.append(("pre", "Earlier topics"))
+    for title, sid, topics in GROUPS:
+        cards = [topic_block(t, hub_dir) for t in topics]
+        tag = '<span class="tag tag-outline">Coming soon</span>' if all(t.get("locked") for t in topics) else ""
+        sections.append(f'<section class="sh-course" id="{sid}"><div class="sh-chead"><h2>{esc(title)}</h2>{tag}</div>'
+                        f'<div class="sh-grid">{"".join(cards)}</div></section>')
+        navl.append((sid, title))
     nav = "".join(f'<a href="#{i}">{l}</a>' for i, l in navl)
     body = f"""<main class="sh-main"><div class="sh-hero"><h1>My AIML study hub</h1>
 <div class="sh-links">{"".join(quick)}</div>
-<div class="sh-bar"><input id="q" class="input" type="search" placeholder="Filter modules and notebooks…" aria-label="Filter"><nav>{nav}</nav></div></div>
+<div class="sh-bar"><input id="q" class="input" type="search" placeholder="Filter topics and notebooks…" aria-label="Filter"><nav>{nav}</nav></div></div>
 {"".join(sections)}</main>
 <script>
 const q=document.getElementById('q');
