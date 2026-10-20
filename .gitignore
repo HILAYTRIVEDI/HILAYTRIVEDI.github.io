@@ -1,0 +1,5 @@
+study/
+tools/.venv/
+__pycache__/
+.tmp_build/
+.tmp_enc/
