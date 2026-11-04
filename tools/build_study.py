@@ -102,7 +102,27 @@ GROUPS = [
         {"t": "Responsible AI Metrics", "n": [("Notes", "C7_M4", "11-")]},
     ]),
     ("Agentic AI", "agentic", [
-        {"t": "Agentic AI", "locked": True},
+        {"t": "Agents, Tools and the Agent Loop", "n": [("Notes", "C9_M1", "11-"), ("Agent loop", "C9_M1", "13-")]},
+        {"t": "Termination, Reflection and Tool Schemas", "n": [("Termination", "C9_M1", "15-"), ("Schemas and skills", "C9_M1", "16-")],
+         "f": ["Sample-Tool-Use-In-Agent-Loop.ipynb"]},
+        {"t": "Agent Failure Modes", "n": [("Notes", "C9_M1", "17-")]},
+        {"t": "Planning: ReAct, Decomposition and Search", "n": [("ReAct", "C9_M1", "21-"), ("Decomposition", "C9_M1", "22-"),
+                                                                 ("Tree search", "C9_M1", "23-")]},
+        {"t": "LangGraph Primer", "n": [("Notes", "C9_M2", "langgraph-primer")], "f": ["Graphs and LangGraph"]},
+        {"t": "Agentic RAG and Evidence Selection", "n": [("Agentic RAG", "C9_M2", "11-"), ("Reformulation", "C9_M2", "13-"),
+                                                          ("Evidence selection", "C9_M2", "14-")]},
+        {"t": "Agent Memory Systems", "n": [("Short and long-term", "C9_M2", "21-"), ("Vector and tool memory", "C9_M2", "23-"),
+                                            ("Memory selection", "C9_M2", "26-")]},
+        {"t": "Model Context Protocol (MCP)", "n": [("Notes", "C9_M2", "24-"), ("Demo", "C9_M2", "25-")]},
+        {"t": "Design Patterns, Critics and Budgets", "n": [("Patterns", "C9_M2", "31-"), ("Critic and verifier", "C9_M2", "32-"),
+                                                           ("Budgets", "C9_M2", "33-")]},
+        {"t": "Workflow Orchestration and State Machines", "n": [("Orchestration", "C9_M3", "11-"), ("State machines and HITL", "C9_M3", "12-"),
+                                                                 ("LangGraph workflows", "C9_M3", "13-")]},
+        {"t": "Multi-Agent Systems", "n": [("Patterns", "C9_M3", "21-"), ("Communication", "C9_M3", "22-"),
+                                           ("LangGraph supervisor", "C9_M3", "23-")]},
+        {"t": "CrewAI and AutoGen", "n": [("CrewAI", "C9_M3", "24-"), ("AutoGen", "C9_M3", "25-")]},
+        {"t": "Agent Evaluation", "n": [("Dimensions", "C9_M4", "11-"), ("Methods", "C9_M4", "13-")]},
+        {"t": "Agent Safety and Reliability", "n": [("Failure taxonomy", "C9_M4", "14-"), ("Safety and guardrails", "C9_M4", "15-")]},
     ]),
 ]
 
@@ -116,6 +136,9 @@ def rel(target: Path, from_dir: Path) -> str:
 
 
 def walk(folder: Path):
+    if folder.is_file():  # a topic can point at a single notebook instead of a folder
+        yield folder
+        return
     for dp, dns, fns in os.walk(folder):
         dns[:] = sorted(d for d in dns if d not in SKIP_DIRS)
         for fn in sorted(fns):
@@ -196,7 +219,8 @@ def file_rows(folder: Path, hub_dir: Path):
         ext = f.suffix.lower()
         if ext not in (".ipynb", ".pdf", ".zip"):
             continue
-        groups.setdefault(f.parent.relative_to(folder).as_posix(), []).append(f)
+        base = folder if folder.is_dir() else folder.parent
+        groups.setdefault(f.parent.relative_to(base).as_posix(), []).append(f)
     out = []
     for sub, files in groups.items():
         items = []
@@ -255,9 +279,9 @@ def topic_block(t, hub_dir: Path):
     mats, count = "", 0
     for fo in t.get("f", []):
         p = AIML / fo
-        if p.is_dir():
+        if p.exists():
             h, c = file_rows(p, hub_dir)
-            mats += f'<div class="sh-folder">{esc(re.sub(r"^\d+-", "", fo))}</div>{h}'
+            mats += f'<div class="sh-folder">{esc(re.sub(r"^\d+-", "", Path(fo).stem))}</div>{h}'
             count += c
     if count:
         det = f'<details><summary>{count} notebooks / files</summary>{mats}</details>'
@@ -275,7 +299,7 @@ def mods_text(t):
     out = []
     for fo in t.get("f", []):
         p = AIML / fo
-        if p.is_dir():
+        if p.exists():
             out += [f.stem for f in walk(p) if f.suffix.lower() in (".ipynb", ".pdf")]
     return " ".join(out)
 
