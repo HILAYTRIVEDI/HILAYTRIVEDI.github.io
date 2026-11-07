@@ -5,5 +5,26 @@
   <link>https://hilaytrivedi.github.io/blog/</link>
   <description>Notes on AI systems, agents and WordPress engineering.</description>
   <language>en</language>
+  <item>
+    <title>Is the AI bubble bursting? What two earlier crashes can tell us</title>
+    <link>https://hilaytrivedi.github.io/blog/post.html?p=is-the-ai-bubble-bursting</link>
+    <guid isPermaLink="false">is-the-ai-bubble-bursting</guid>
+    <pubDate>Sat, 07 Nov 2026 00:00:00 +0000</pubDate>
+    <description>AI has crashed twice before, each time because promises outran proof. Using a credit card as the model, here is how both crashes happened, what is different now, and three questions to ask of any AI headline.</description>
+    <category>ai</category>
+    <category>history</category>
+    <category>markets</category>
+  </item>
+  <item>
+    <title>Build your own AI agent harness from scratch in Python</title>
+    <link>https://hilaytrivedi.github.io/blog/post.html?p=build-an-ai-agent-harness-in-python</link>
+    <guid isPermaLink="false">build-an-ai-agent-harness-in-python</guid>
+    <pubDate>Sat, 07 Nov 2026 00:00:00 +0000</pubDate>
+    <description>A coding agent is a model plus a harness: the loop, tools, prompt, safety checks and memory around it. Here is one built from scratch in six small steps, with the code that matters at each layer.</description>
+    <category>agents</category>
+    <category>python</category>
+    <category>llm</category>
+    <category>claude</category>
+  </item>
 </channel>
 </rss>

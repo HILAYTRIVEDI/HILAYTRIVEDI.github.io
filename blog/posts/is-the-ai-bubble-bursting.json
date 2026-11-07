@@ -1,0 +1,165 @@
+{
+  "slug": "is-the-ai-bubble-bursting",
+  "title": "Is the AI bubble bursting? What two earlier crashes can tell us",
+  "date": "2026-11-07",
+  "summary": "AI has crashed twice before, each time because promises outran proof. Using a credit card as the model, here is how both crashes happened, what is different now, and three questions to ask of any AI headline.",
+  "tags": [
+    "ai",
+    "history",
+    "markets"
+  ],
+  "draft": false,
+  "blocks": [
+    {
+      "type": "callout",
+      "text": "This post goes with the video: [Is the AI Bubble Bursting? AI Has Crashed Twice Before](https://youtu.be/qBGXh4Dg4xo). Market figures are as reported around 30 October 2026 and will date quickly. None of this is investment advice."
+    },
+    {
+      "type": "p",
+      "text": "On 30 October, tech stocks lost more than a trillion dollars in value in a single day. The day before, Alphabet alone lost about 500 billion. If you use AI at work or build with it, you keep hearing two stories: AGI is close, and it is all a bubble."
+    },
+    {
+      "type": "p",
+      "text": "AI has crashed twice before. The pattern is worth knowing, because it repeats."
+    },
+    {
+      "type": "h2",
+      "text": "A model: AI's history is a credit card"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "A **prediction** is a purchase.",
+        "**Funding** is your credit limit.",
+        "**Results** are your income.",
+        "Sooner or later, the **bill** arrives."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "A crash happens when the bill is bigger than the income."
+    },
+    {
+      "type": "h2",
+      "text": "Swipe one: 1955 to the first winter"
+    },
+    {
+      "type": "p",
+      "text": "In 1955, four researchers proposed a summer study with an estimated budget of 13,500 dollars. They wrote that every aspect of learning could be described so precisely that a machine could simulate it, and they expected a significant advance in one summer."
+    },
+    {
+      "type": "p",
+      "text": "The promises grew. In 1960, Herbert Simon wrote that machines would be capable of any work a man can do within twenty years. In 1967, Marvin Minsky wrote that AI would be substantially solved within a generation."
+    },
+    {
+      "type": "p",
+      "text": "The bill came in 1966. A US committee called ALPAC saw no predictable prospect of useful machine translation. In Britain, James Lighthill found that no part of AI had produced the major impact promised. His diagnosis was the **combinatorial explosion**: every choice opens more choices, and soon there are more paths than a machine can search."
+    },
+    {
+      "type": "p",
+      "text": "British universities lost most of their AI support, and DARPA ended its speech program with no follow-on. This is called the first AI winter. It was triggered by reviewers."
+    },
+    {
+      "type": "h2",
+      "text": "Swipe two: expert systems and the second winter"
+    },
+    {
+      "type": "p",
+      "text": "The second boom looked safer because it made money. Expert systems put human rules into software. One of them, XCON, saved its maker tens of millions of dollars a year. US federal AI funding went from 106 million dollars in 1984 to 274 million in 1988."
+    },
+    {
+      "type": "p",
+      "text": "Then the market turned. In 1987, the half billion dollar market for Lisp machines, computers built for AI, collapsed, undermined by workstations, especially from Sun. Japan closed its Fifth Generation project in 1992 after about 400 million dollars. By the mid 2000s, researchers were avoiding the term \"AI\" altogether."
+    },
+    {
+      "type": "p",
+      "text": "The first crash came from reviewers. The second came from the market."
+    },
+    {
+      "type": "h2",
+      "text": "The work that kept going"
+    },
+    {
+      "type": "p",
+      "text": "During the cold years, some research continued quietly:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "1986: a paper in *Nature* described back-propagation, a way for neural networks to learn from their mistakes.",
+        "2012: AlexNet won ImageNet with a 15.3% top-5 error rate. Second place had 26.2%.",
+        "2017: the Transformer paper.",
+        "November 2022: ChatGPT launched."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Swipe three: today"
+    },
+    {
+      "type": "p",
+      "text": "One thing is different this time, and one thing is the same."
+    },
+    {
+      "type": "p",
+      "text": "**Different: there is real income.** Last quarter, Amazon's cloud sales rose 39%, Azure rose 48% and Google Cloud rose 103%. Microsoft's CFO says demand still exceeds supply."
+    },
+    {
+      "type": "p",
+      "text": "**The same: spending is ahead of results.** Four companies are expected to spend more than 700 billion dollars on capital spending this year. Amazon's free cash flow was negative 42.4 billion over twelve months. Meta launched about 35 billion dollars of stock offerings, the first part of a 95 billion dollar plan, to help pay for AI."
+    },
+    {
+      "type": "p",
+      "text": "Lenders are charging more, like a card company that has become nervous:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "The best-rated data center bonds started the year yielding under 5%. A Morgan Stanley strategist puts them close to 7% now.",
+        "At least 18 data center financings carry double-digit yields.",
+        "Oracle issued a force majeure notice on a New Mexico data center.",
+        "The IMF reviewed 14 AI deals carrying about 650 billion dollars of debt."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Then October happened. OpenAI told investors it had about 50 billion dollars in annualised revenue, below the 68 billion widely reported; the larger figure reportedly included gross revenue from partners. Chinese AI stocks fell about 40% in under four months. Alphabet had its worst day ever, and Intel fell about 29%. By 30 October the Nasdaq 100 was near 10% below its record."
+    },
+    {
+      "type": "p",
+      "text": "That is a sharp fall. It is not a crash yet. I have not found a review that rules on this boom the way Lighthill ruled on the first one."
+    },
+    {
+      "type": "h2",
+      "text": "Three questions for any AI headline"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Who is paying: revenue or borrowed money?** Right now it is a mix of revenue, new shares and debt.",
+        "**Is it used outside a demo?** In early 2026, 20% of US firms used AI in some function. That is real, and there is a long way to go.",
+        "**Are results still improving?** As of April's AI Index, yes. One coding benchmark went from 60% to near 100% in a year."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Where I land"
+    },
+    {
+      "type": "p",
+      "text": "AI has survived every crash in this story, and I do not think that changes. The weak part is the borrowed money. If a crash comes, I expect it to start with the builders who borrowed against promises, not with the technology."
+    },
+    {
+      "type": "p",
+      "text": "Two things would change my mind: lenders refusing deals, rather than just charging more, or cloud growth slowing down. Nvidia reports on 17 November, which is my next test."
+    },
+    {
+      "type": "p",
+      "text": "Both times, the work kept going and the line climbed again. So whatever the market does, understanding how this technology is built stays useful. If you want to start, watch [how I built my own AI agent harness from scratch](/blog/post.html?p=build-an-ai-agent-harness-in-python), or [the video version](https://youtu.be/qBGXh4Dg4xo) of this post."
+    }
+  ]
+}
