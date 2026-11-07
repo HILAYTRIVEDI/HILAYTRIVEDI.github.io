@@ -1,0 +1,183 @@
+{
+  "slug": "build-an-ai-agent-harness-in-python",
+  "title": "Build your own AI agent harness from scratch in Python",
+  "date": "2026-11-07",
+  "summary": "A coding agent is a model plus a harness: the loop, tools, prompt, safety checks and memory around it. Here is one built from scratch in six small steps, with the code that matters at each layer.",
+  "tags": [
+    "agents",
+    "python",
+    "llm",
+    "claude"
+  ],
+  "draft": false,
+  "blocks": [
+    {
+      "type": "callout",
+      "text": "This post goes with the video: [Build your own AI agent harness from scratch in Python](https://youtu.be/AFkYlg4347c). The full code is on GitHub at [HILAYTRIVEDI/harness-demo](https://github.com/HILAYTRIVEDI/harness-demo), one branch per step (`v1` to `v6`). It is a teaching demo, not production code."
+    },
+    {
+      "type": "p",
+      "text": "When people say \"AI agent\", they usually mean a language model wrapped in a program. That program is the **harness**: the loop that keeps the conversation going, the tools the model can ask for, the system prompt, the safety checks and the memory. Claude Code is a harness. So is every agent you have used."
+    },
+    {
+      "type": "p",
+      "text": "The model alone cannot read your files or run a command. It can only produce text that asks for those things. The harness is what turns that text into action. Building a small one is the fastest way to see where the model ends and the product begins."
+    },
+    {
+      "type": "p",
+      "text": "The demo uses no agent framework. It uses only the `anthropic` SDK, pointed at [AIML API](https://aimlapi.com), which serves Claude through the same Messages API format. Because the SDK and model names change often, check them against the current docs before you copy anything."
+    },
+    {
+      "type": "h2",
+      "text": "The map: a harness is a car"
+    },
+    {
+      "type": "p",
+      "text": "The video explains each part with a car. The model is the engine. Everything else is what makes it useful to drive."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Engine: the LLM call",
+        "Chassis: the agent loop",
+        "Wheels: tools",
+        "Steering and GPS: the system prompt, plus streaming as the dashboard",
+        "Brakes and saved places: permissions and memory",
+        "Fuel gauge: the context window"
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Step 1: one call (the engine)"
+    },
+    {
+      "type": "p",
+      "text": "The first version sends one message and prints one reply. It teaches the three things every call needs: a model, a `max_tokens` limit, and a list of `messages`, each with a role of `user` or `assistant`. Nothing is remembered afterwards."
+    },
+    {
+      "type": "h2",
+      "text": "Step 2: the loop (the chassis)"
+    },
+    {
+      "type": "p",
+      "text": "To get a conversation, wrap the call in a loop. The key fact is that the model is stateless. It remembers nothing between calls. The harness keeps the whole history in a list and sends all of it every time."
+    },
+    {
+      "type": "code",
+      "code": "messages = []  # the entire conversation lives here\n\nwhile True:\n    user_input = input(\"you > \").strip()\n    messages.append({\"role\": \"user\", \"content\": user_input})\n\n    response = client.messages.create(\n        model=MODEL,\n        max_tokens=MAX_TOKENS,\n        messages=messages,\n    )\n\n    # Keep the full content (not just the text) so the history stays exact.\n    messages.append({\"role\": \"assistant\", \"content\": response.content})",
+      "lang": "python"
+    },
+    {
+      "type": "p",
+      "text": "So the model's \"memory\" of the chat is really the harness resending the list. That also means every turn costs more than the last."
+    },
+    {
+      "type": "h2",
+      "text": "Step 3: tools and the agent loop (the wheels)"
+    },
+    {
+      "type": "p",
+      "text": "A tool has two halves. A schema tells the model the tool exists. A plain Python function does the work when the model asks."
+    },
+    {
+      "type": "code",
+      "code": "def read_file(path):\n    return Path(path).read_text()\n\nTOOLS = [{\n    \"name\": \"read_file\",\n    \"description\": \"Read the full text content of a file.\",\n    \"input_schema\": {\n        \"type\": \"object\",\n        \"properties\": {\"path\": {\"type\": \"string\"}},\n        \"required\": [\"path\"],\n    },\n}]",
+      "lang": "python"
+    },
+    {
+      "type": "p",
+      "text": "The model never runs anything. It replies with a `tool_use` block that names a tool and its input. The harness runs the function and sends the result back as a `tool_result`. Repeat until the model stops asking."
+    },
+    {
+      "type": "code",
+      "code": "def agent_turn(messages):\n    while True:\n        response = client.messages.create(\n            model=MODEL, max_tokens=MAX_TOKENS,\n            tools=TOOLS, messages=messages,\n        )\n        messages.append({\"role\": \"assistant\", \"content\": response.content})\n\n        if response.stop_reason != \"tool_use\":\n            return  # the model is done with this request\n\n        tool_results = []\n        for block in response.content:\n            if block.type != \"tool_use\":\n                continue\n            output = run_tool(block.name, block.input)\n            tool_results.append({\n                \"type\": \"tool_result\",\n                \"tool_use_id\": block.id,  # links the result to the request\n                \"content\": output,\n            })\n\n        messages.append({\"role\": \"user\", \"content\": tool_results})",
+      "lang": "python"
+    },
+    {
+      "type": "p",
+      "text": "This is the agent loop. One user message can now trigger many model calls. The demo gives the model five tools: list files, read a file, write a file, edit a file (replace one exact snippet that must match once) and run a shell command."
+    },
+    {
+      "type": "h2",
+      "text": "Step 4: system prompt and streaming (steering and the dashboard)"
+    },
+    {
+      "type": "p",
+      "text": "The system prompt tells the agent who it is and where it is working. Streaming prints tokens as they arrive, so you are not staring at a blank screen while a long answer is written."
+    },
+    {
+      "type": "h2",
+      "text": "Step 5: safety (the brakes) and memory (saved places)"
+    },
+    {
+      "type": "p",
+      "text": "Once an agent can write files and run commands, it needs limits. The demo adds four."
+    },
+    {
+      "type": "p",
+      "text": "**Permission prompts.** Tools that change things are marked dangerous. The harness asks before running them."
+    },
+    {
+      "type": "code",
+      "code": "DANGEROUS_TOOLS = {\"write_file\", \"edit_file\", \"run_bash\", \"remember\"}\n\ndef ask_permission(name, tool_input):\n    if name not in DANGEROUS_TOOLS or name in always_allowed:\n        return True\n    preview = tool_input.get(\"command\") or tool_input.get(\"path\") or tool_input.get(\"fact\")\n    answer = input(f\"  Allow {name}: {preview}?  [y]es / [n]o / [a]lways > \").strip().lower()\n    if answer == \"a\":\n        always_allowed.add(name)\n        return True\n    return answer == \"y\"",
+      "lang": "python"
+    },
+    {
+      "type": "p",
+      "text": "**A workspace boundary.** File tools resolve every path and refuse anything outside the working folder."
+    },
+    {
+      "type": "code",
+      "code": "def safe_path(path):\n    p = (WORKSPACE / path).resolve()\n    if not p.is_relative_to(WORKSPACE):\n        raise ToolError(f\"Path {path} is outside the workspace {WORKSPACE}\")\n    return p",
+      "lang": "python"
+    },
+    {
+      "type": "p",
+      "text": "**Timeouts and a turn limit.** Shell commands get a timeout, and `MAX_TURNS = 25` caps how many model calls one request may use, so a confused agent cannot loop forever."
+    },
+    {
+      "type": "p",
+      "text": "**Memory.** A `MEMORY.md` file is loaded into the system prompt at startup, and a `remember` tool appends to it. That is how the agent knows something the next time you start it."
+    },
+    {
+      "type": "p",
+      "text": "These checks live in the harness, not the model. A model can be asked to be careful, but only the harness can enforce it."
+    },
+    {
+      "type": "h2",
+      "text": "Step 6: context management (the fuel gauge)"
+    },
+    {
+      "type": "p",
+      "text": "Because the whole history is resent each turn, the context fills up. Step 6 tracks it. After every call the harness reads the token usage, and when the context passes a threshold it compacts: it asks the model to summarise the conversation, then replaces the history with that summary."
+    },
+    {
+      "type": "code",
+      "code": "COMPACT_AT = 150000  # compact once the context passes this many tokens\n\ndef compact(system, messages):\n    request = messages + [{\"role\": \"user\", \"content\": COMPACT_PROMPT}]\n    response = call_model(system, request, echo=False)\n    summary = \"\".join(b.text for b in response.content if b.type == \"text\")\n\n    messages[:] = [\n        {\"role\": \"user\", \"content\": f\"Summary of our conversation so far:\\n\\n{summary}\"},\n        {\"role\": \"assistant\", \"content\": \"Got it. I'll continue from this summary.\"},\n    ]",
+      "lang": "python"
+    },
+    {
+      "type": "p",
+      "text": "Slash commands finish the job: `/tokens` shows the context size, `/compact` summarises on demand, `/clear` starts over, `/save` stores the session, `/help` and `/exit` do what they say."
+    },
+    {
+      "type": "h2",
+      "text": "What to take away"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "The model is stateless. History, tools, limits and memory all live in the harness.",
+        "The agent loop is a few lines. What makes an agent good or bad is mostly what is wrapped around it.",
+        "Safety belongs in code you control: permissions, path checks, timeouts and turn limits.",
+        "Context is a budget. Track it and compact before it runs out."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "To follow along, clone the repo and run `git checkout v1`, then `v2` and so on. `git diff v1 v2` shows exactly what each step adds. Watch the [full walkthrough on YouTube](https://youtu.be/AFkYlg4347c)."
+    }
+  ]
+}

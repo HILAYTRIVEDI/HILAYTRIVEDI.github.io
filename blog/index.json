@@ -1,4 +1,30 @@
 {
   "schema": 1,
-  "posts": []
+  "posts": [
+    {
+      "slug": "is-the-ai-bubble-bursting",
+      "title": "Is the AI bubble bursting? What two earlier crashes can tell us",
+      "date": "2026-11-07",
+      "summary": "AI has crashed twice before, each time because promises outran proof. Using a credit card as the model, here is how both crashes happened, what is different now, and three questions to ask of any AI headline.",
+      "tags": [
+        "ai",
+        "history",
+        "markets"
+      ],
+      "readingMinutes": 4
+    },
+    {
+      "slug": "build-an-ai-agent-harness-in-python",
+      "title": "Build your own AI agent harness from scratch in Python",
+      "date": "2026-11-07",
+      "summary": "A coding agent is a model plus a harness: the loop, tools, prompt, safety checks and memory around it. Here is one built from scratch in six small steps, with the code that matters at each layer.",
+      "tags": [
+        "agents",
+        "python",
+        "llm",
+        "claude"
+      ],
+      "readingMinutes": 5
+    }
+  ]
 }
