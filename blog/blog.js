@@ -57,11 +57,11 @@ async function initIndex() {
       (!term || (p.title + ' ' + p.summary + ' ' + p.tags.join(' ')).toLowerCase().includes(term)));
     chips.innerHTML = ['', ...tags].map((t) => `<button class="b-chip" data-tag="${esc(t)}" aria-pressed="${t === tag}">${t ? esc(t) : 'All'}</button>`).join('');
     count.textContent = `${shown.length} of ${posts.length} post${posts.length === 1 ? '' : 's'}`;
-    list.innerHTML = shown.length ? shown.map((p) => `<li class="b-row"><a href="post.html?p=${encodeURIComponent(p.slug)}">
-      <time datetime="${esc(p.date)}">${esc(fmtDate(p.date))}</time>
-      <div><h2>${esc(p.title)}</h2><p>${inline(p.summary.replace(/\[([^\]]+)\]\([^)\s]+\)/g, '$1'))}</p></div>
-      <div class="b-side"><span>${p.readingMinutes} min read</span><span class="b-tags">${p.draft ? '<span class="tag b-draft">Draft</span>' : ''}${p.tags.map((t) => `<span class="tag tag-neutral">${esc(t)}</span>`).join('')}</span></div>
-    </a></li>`).join('') : `<li class="b-empty">${posts.length ? 'No posts match.' : 'No posts yet. Check back soon.'}</li>`;
+    list.innerHTML = shown.length ? shown.map((p) => `<li class="b-card"><a href="post.html?p=${encodeURIComponent(p.slug)}">
+      <div class="b-card-top"><time datetime="${esc(p.date)}">${esc(fmtDate(p.date))}</time><span>${p.readingMinutes} min read</span></div>
+      <h2>${esc(p.title)}</h2><p>${inline(p.summary.replace(/\[([^\]]+)\]\([^)\s]+\)/g, '$1'))}</p>
+      <div class="b-tags">${p.draft ? '<span class="tag b-draft">Draft</span>' : ''}${p.tags.map((t) => `<span class="tag tag-neutral">${esc(t)}</span>`).join('')}</div>
+    </a></li>`).join('') : `<li class="b-empty" style="grid-column:1/-1">${posts.length ? 'No posts match.' : 'No posts yet. Check back soon.'}</li>`;
     const u = new URLSearchParams(); if (tag) u.set('tag', tag); if (term) u.set('q', q.value.trim());
     history.replaceState(null, '', u.toString() ? '?' + u : location.pathname);
   };
@@ -85,18 +85,20 @@ async function initPost() {
   const md = document.querySelector('meta[name=description]'); if (md) md.content = post.summary;
   const words = post.blocks.map((b) => [b.text, b.code, b.caption, ...(b.items || [])].join(' ')).join(' ').split(/\s+/).filter(Boolean).length;
   const mins = Math.max(1, Math.round(words / 220));
-  art.innerHTML = `<header class="p-head">
+  const heads = post.blocks.filter((b) => b.type === 'h2');
+  const toc = heads.length > 1 ? `<aside class="p-toc" aria-label="On this page"><div class="a-label">On this page</div><ol>${heads.map((h) => `<li><a href="#${esc(slug(h.text))}">${inline(h.text)}</a></li>`).join('')}</ol></aside>` : '';
+  art.innerHTML = `<div class="p-grid${toc ? ' has-toc' : ''}"><div class="p-main"><header class="p-head">
       <div class="b-tags">${post.draft ? '<span class="tag b-draft">Draft</span>' : ''}${post.tags.map((t) => `<a class="tag tag-accent" href="./?tag=${encodeURIComponent(t)}" style="text-decoration:none">${esc(t)}</a>`).join('')}</div>
       <h1>${esc(post.title)}</h1>
       <div class="p-sub"><span>${esc(fmtDate(post.date))}</span>${post.updated ? `<span>Updated ${esc(fmtDate(post.updated))}</span>` : ''}<span>${mins} min read</span><span style="margin-left:auto">${esc(post.author || 'Hilay Trivedi')}</span></div>
     </header>
-    <div class="p-body">${post.blocks.map((b) => (BLOCKS[b.type] || (() => ''))(b)).join('')}</div>`;
+    <div class="p-body">${post.blocks.map((b) => (BLOCKS[b.type] || (() => ''))(b)).join('')}</div></div>${toc}</div>`;
 
   const list = manifest.posts || [], i = list.findIndex((p) => p.slug === s);
   if (i !== -1 && list.length > 1) {
     const newer = list[i - 1], older = list[i + 1];
     const link = (p, lbl) => p ? `<a href="post.html?p=${encodeURIComponent(p.slug)}"><span>${lbl}</span><strong>${esc(p.title)}</strong></a>` : '<span></span>';
-    art.insertAdjacentHTML('beforeend', `<nav class="p-pager" aria-label="More posts">${link(older, '← Older')}${link(newer, 'Newer →')}</nav>`);
+    art.querySelector('.p-main').insertAdjacentHTML('beforeend', `<nav class="p-pager" aria-label="More posts">${link(older, '← Older')}${link(newer, 'Newer →')}</nav>`);
   }
 }
 
