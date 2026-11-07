@@ -25,6 +25,20 @@
         "claude"
       ],
       "readingMinutes": 5
+    },
+    {
+      "slug": "ai-evals-explained-how-to-test-your-ai-app",
+      "title": "AI evals explained: how to test your AI app",
+      "date": "2026-11-07",
+      "updated": "2026-11-07",
+      "summary": "A benchmark score tells you what to try, not what to ship. Here are the five ways AI gets graded, how to grade a search app and an agent, and the routine that turns it into a one-page eval plan for your own app.",
+      "tags": [
+        "ai",
+        "evals",
+        "testing",
+        "llm"
+      ],
+      "readingMinutes": 11
     }
   ]
 }

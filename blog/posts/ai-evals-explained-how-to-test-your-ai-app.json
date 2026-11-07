@@ -1,0 +1,400 @@
+{
+  "slug": "ai-evals-explained-how-to-test-your-ai-app",
+  "title": "AI evals explained: how to test your AI app",
+  "date": "2026-11-07",
+  "updated": "2026-11-07",
+  "summary": "A benchmark score tells you what to try, not what to ship. Here are the five ways AI gets graded, how to grade a search app and an agent, and the routine that turns it into a one-page eval plan for your own app.",
+  "tags": [
+    "ai",
+    "evals",
+    "testing",
+    "llm"
+  ],
+  "draft": false,
+  "blocks": [
+    {
+      "type": "callout",
+      "text": "This post goes with the video: [AI Evals Explained: How to Test Your AI App](https://youtu.be/ODrZWZLDlQo). The free one-page version of the plan is linked in the video description. Benchmark and leaderboard figures are as reported on the dates given and will move."
+    },
+    {
+      "type": "h2",
+      "text": "The test was broken"
+    },
+    {
+      "type": "p",
+      "text": "In February 2026, OpenAI said a popular coding test, SWE-bench Verified, was flawed: over half of the hard tasks it checked had broken tests (59.4%). It recommended a replacement. In July it checked that one too, found about 30% of its tasks broken, and took the recommendation back. Both are OpenAI's own findings."
+    },
+    {
+      "type": "p",
+      "text": "A model's score on a broken test tells you nothing. The check that catches this is called an **eval**."
+    },
+    {
+      "type": "h2",
+      "text": "Who checks the AI?"
+    },
+    {
+      "type": "p",
+      "text": "On November 2, OpenAI released a test called LifeVal. On OpenAI's own page, its models score between 90 and 100% on the example tasks. OpenAI built the test and reports the scores for its own models."
+    },
+    {
+      "type": "p",
+      "text": "Every launch comes with a chart like that. My position: **a chart tells you what to try. Only your own test tells you what to ship.**"
+    },
+    {
+      "type": "h2",
+      "text": "An eval is a driving test"
+    },
+    {
+      "type": "p",
+      "text": "You don't trust someone to drive because they say they can. You give them a test. An eval is the same thing for AI, and it has four parts:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Inputs**, like \"parallel park here\".",
+        "**What a good result looks like.**",
+        "**A grader** who decides pass or fail.",
+        "**A score** at the end."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "The grader is the hard part. There are many ways to grade a drive, and each has a cost. The rest of this post is five graders, each fixing the last one's blind spot, then what those graders have to handle (search apps, agents, attacks), then the routine that ties it together."
+    },
+    {
+      "type": "h2",
+      "text": "Grader 1: the answer key"
+    },
+    {
+      "type": "p",
+      "text": "The written test. There is one right answer and you check against the key. That is **exact match**, and the score is accuracy: correct answers divided by total answers. Five questions, four right, 80%. It is fast and free, and the well-known benchmarks work this way (a benchmark is a public test that AI labs run their models on)."
+    },
+    {
+      "type": "p",
+      "text": "Clean the text first: \"Paris.\" with a period does not match \"Paris\". And accuracy hides a bigger problem."
+    },
+    {
+      "type": "h2",
+      "text": "Grader 2: catching the right things"
+    },
+    {
+      "type": "p",
+      "text": "Say a bot flags urgent support tickets. You test it on 10 tickets, 3 of which are really urgent. The bot flags 4, and 2 of those are right. Accuracy says 70%. A lazy bot that flags nothing also scores 70%, because it is right about the 7 normal tickets."
+    },
+    {
+      "type": "p",
+      "text": "So ask two better questions:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Precision**: of the tickets flagged, how many were really urgent? 2 out of 4, 50%.",
+        "**Recall**: of the really urgent tickets, how many did you catch? 2 out of 3, 67%."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "**F1** is one score that is only high when both are high: 2 × precision × recall ÷ (precision + recall). Here that is 57%, and the lazy bot gets zero."
+    },
+    {
+      "type": "code",
+      "code": "tp, fp, fn = 2, 2, 1          # urgent tickets: caught, wrongly flagged, missed\n\nprecision = tp / (tp + fp)    # of the flags, how many were real\nrecall    = tp / (tp + fn)    # of the real ones, how many we caught\nf1 = 2 * precision * recall / (precision + recall)\n\nprint(f\"precision {precision:.0%}  recall {recall:.0%}  F1 {f1:.0%}\")",
+      "lang": "python"
+    },
+    {
+      "type": "p",
+      "text": "Use it whenever your app sorts, labels or finds the right documents."
+    },
+    {
+      "type": "h3",
+      "text": "From word overlap to meaning"
+    },
+    {
+      "type": "p",
+      "text": "Older scores like BLEU and ROUGE count the words an answer shares with a reference answer. \"Your order ships Monday\" and \"It'll go out early next week\" mean the same thing and share almost no words, so the score is low. On open-ended chat, researchers found these scores barely match what people think is a good answer."
+    },
+    {
+      "type": "p",
+      "text": "**BERTScore** compares meaning instead. It turns each word into a list of numbers (an embedding) and compares the lists. In its paper, on tricky paraphrases, BLEU scored 0.53 (0.5 is a coin flip) and BERTScore reached 0.69. It still needs a written reference answer."
+    },
+    {
+      "type": "h2",
+      "text": "Grader 3: an AI that grades an AI"
+    },
+    {
+      "type": "p",
+      "text": "For real writing, most teams use an AI judge. You give a strong model a **rubric**, a checklist of what a good answer needs, and ask it to grade. This is called **LLM-as-judge**. You can ask for a score out of five, or ask it to pick the better of two answers."
+    },
+    {
+      "type": "p",
+      "text": "Can you trust it? A 2023 study tested GPT-4 as a judge. Leaving out ties, it agreed with human experts 85% of the time. Humans agreed with each other 81% of the time. But swap the order of two answers and GPT-4 kept the same verdict only 65% of the time. Claude-v1, an early Anthropic model, kept it 23.8% of the time. That is **position bias**: the verdict depends on the order. There are other biases too, like favoring longer answers."
+    },
+    {
+      "type": "p",
+      "text": "What to do about it:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Ask twice with the order swapped, and count only matching verdicts.",
+        "Give the judge a reference answer when you have one. On 10 math questions in that study, this cut grading mistakes from 70% to 15%.",
+        "Check the judge against your own labels."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Grader 4: did the code run?"
+    },
+    {
+      "type": "p",
+      "text": "If the AI writes code, you can run it. Unit tests are small programs that check the code does the right thing: it passes or it fails. But models are random, so ten tries give ten different programs. Coding benchmarks use **pass@k**: give the model k tries and count the task solved if any one passes."
+    },
+    {
+      "type": "p",
+      "text": "Say a model makes 10 attempts and 3 pass. Pass@1 is 3 out of 10, 30%. Pass@5 asks: pick five at random, what is the chance at least one works? That is one minus the chance all five fail, which comes to 92%."
+    },
+    {
+      "type": "code",
+      "code": "from math import comb\n\nn, c = 10, 3                     # 10 attempts, 3 passed the tests\nk = 5\n\nfail_all = comb(n - c, k) / comb(n, k)   # chance all k picks fail\npass_at_k = 1 - fail_all                 # chance at least one works\nprint(f\"pass@{k} = {pass_at_k:.0%}\")",
+      "lang": "python"
+    },
+    {
+      "type": "p",
+      "text": "OpenAI's Codex, an early coding model, solved 28.8% of problems with one try and 70.2% with 100 tries in 2021. Always look at the k."
+    },
+    {
+      "type": "h2",
+      "text": "Grader 5: ask people"
+    },
+    {
+      "type": "p",
+      "text": "Some things only people can judge. The big public version is **Arena**: you type a prompt, two anonymous models answer, and you pick the better one. The votes become a rating, similar to chess ratings."
+    },
+    {
+      "type": "p",
+      "text": "The top three as of October 27 were 1528, 1520 and 1509. The top rating was marked preliminary, and the top two were 8 points apart, which is close to a coin flip. These figures have since moved."
+    },
+    {
+      "type": "p",
+      "text": "Those are the graders. Now, what are you grading?"
+    },
+    {
+      "type": "h2",
+      "text": "Grading a search app"
+    },
+    {
+      "type": "p",
+      "text": "Most AI apps answer questions from your own documents. That is **RAG**, short for retrieval-augmented generation. A search step pulls the right pages, then the AI writes an answer from them. It is an open-book exam. A wrong answer can mean you opened the wrong page, or misread the right one. Those are different bugs, so grade the two steps apart."
+    },
+    {
+      "type": "p",
+      "text": "A RAG system has two kinds of memory: the pages it searches, and what the AI learned in training. A correct answer can come from either, so a right answer does not prove the search worked."
+    },
+    {
+      "type": "h3",
+      "text": "Search, step by step"
+    },
+    {
+      "type": "p",
+      "text": "There are two common ways to search:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Keyword search**, most often BM25, scores a page higher when it has your words. Rare words count for more. A big test called BEIR found it a strong baseline. But search \"cancel my subscription\" and a page that says \"terminate your plan\" scores zero.",
+        "**Meaning search** turns the question and every page into embeddings and finds the closest. That finds the page. But on questions about specific names, researchers found it drastically underperformed keyword search."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "So teams run both and merge the two ranked lists. A common method is **reciprocal rank fusion**: from each list, a page gets 1 ÷ (60 + rank), and the scores add up."
+    },
+    {
+      "type": "code",
+      "code": "k = 60\nranks = {\"A\": (1, 3), \"B\": (4, 1), \"C\": (2, 2)}   # rank in keyword list, rank in meaning list\n\nfor page, (kw, meaning) in ranks.items():\n    score = 1 / (k + kw) + 1 / (k + meaning)\n    print(f\"page {page}: {score:.5f}\")",
+      "lang": "python"
+    },
+    {
+      "type": "p",
+      "text": "Then a **re-ranker** can re-sort the top few. It reads the question and each page together, which is more accurate and slower, so it only sees a shortlist."
+    },
+    {
+      "type": "h3",
+      "text": "Grading the search"
+    },
+    {
+      "type": "p",
+      "text": "Take one question. Four pages in your library really answer it. The search returns five, and three are right."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Precision@5**: how much of what it returned was right. 3 out of 5, 60%.",
+        "**Recall@5**: how much of the right stuff it found. 3 out of 4, 75%.",
+        "**Hit rate**: did at least one right page show up?",
+        "**MRR** (mean reciprocal rank): where the first right page lands. Rank 1 scores 1, rank 2 scores a half, rank 3 a third. If the first right page lands at ranks 1, 3 and 2 over three questions, the average is 0.61.",
+        "**NDCG** goes further and rewards putting the most useful pages highest."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Run these before and after each change to the search."
+    },
+    {
+      "type": "h3",
+      "text": "Grading the answer"
+    },
+    {
+      "type": "p",
+      "text": "Now the second step. Does the answer hold up?"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Faithfulness**: can every claim be backed by the pages the search returned? The Ragas tool scores it as supported claims ÷ all claims. Four claims, three backed up, 0.75.",
+        "**Answer relevance**: did it address the question?",
+        "**Correctness**: does it match a known right answer?",
+        "**Completeness**: did it leave out something important?"
+      ]
+    },
+    {
+      "type": "p",
+      "text": "These need an examiner that reads, so a judge or a person does the checking."
+    },
+    {
+      "type": "h2",
+      "text": "Grading an agent"
+    },
+    {
+      "type": "p",
+      "text": "An agent is an AI that takes actions, not just answers: it searches, uses tools like looking up an order, and changes things. So the examiner doesn't only check where you parked. They watch how you drove."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Check the end state.** The τ-bench benchmark has an agent handle a customer request, like changing an order, then checks the store's database. Is the order changed, and nothing else broken?",
+        "**Check the path.** A trace is the full record of what the agent did, made of spans, one per step. Now you can check it picked the right tool and passed the right inputs. DeepEval scores both. Mistakes compound: Anthropic notes agents bring higher costs and errors that pile up.",
+        "**Run it more than once.** Pass@k asks if any try worked. **Pass^k** asks if *every* try worked. That is reliability. In the original τ-bench paper the best agents solved under half the tasks, and when they had to solve the same retail task 8 times in a row it dropped under 25%. Your users get one try, every time."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Last, read the transcripts, because a grader can be wrong too."
+    },
+    {
+      "type": "h2",
+      "text": "Can someone break it?"
+    },
+    {
+      "type": "p",
+      "text": "**Red teaming** is a structured effort to find flaws in an AI system: you attack your own app first. The classic attack is **prompt injection**, input that changes what the AI does. It can come from a user, or hide in a web page or file the AI reads. Put attacks in your test set."
+    },
+    {
+      "type": "p",
+      "text": "Then ask each question many ways. Researchers changed only the formatting of a question for one open model, in a test with worked examples in the prompt, and its score moved by up to 76 points. If yours swings, report the range, not one number."
+    },
+    {
+      "type": "h2",
+      "text": "Why benchmarks are only a start"
+    },
+    {
+      "type": "p",
+      "text": "Public benchmarks have a limit, as the coding test at the start showed. OpenAI also called that test **contaminated**: test questions leaked into the training data. Scale AI wrote fresh math questions in the style of a popular test, and some models dropped by up to 8%. And when a test is near full marks it can't tell the top models apart; that coding test's top score was 97% as of September."
+    },
+    {
+      "type": "p",
+      "text": "So use benchmarks to pick candidates. Use your own test to pick the winner."
+    },
+    {
+      "type": "h2",
+      "text": "The routine, start to end"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Before launch, build a golden set**: your own test cases. Twenty to fifty is a great start, drawn from failures you have already seen. Every time a user reports a failure, it becomes a new test case.",
+        "**Run it on every change.** Skipping this is what OpenAI's guide calls a vibe-based eval: it seems like it's working. Compare the score to the last version. Some tests should pass almost every time and guard what already works. Others should start low; those are the goals you are climbing toward.",
+        "**Release carefully.** Run the new version on real or replayed traffic without showing anyone. Then give it to a small share of users first. That is a canary, like the bird in the coal mine.",
+        "**After launch, keep grading.** Sample live conversations and read some yourself. Watch the score over time: documents change and users change, so the score can drift down with no code change at all. Keep user feedback too, like thumbs up and thumbs down."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Then every failure goes back into step one, and the loop starts again."
+    },
+    {
+      "type": "h2",
+      "text": "Which eval, and how much?"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "One right answer: exact match.",
+        "Sorts or finds things: precision and recall.",
+        "Searches your documents: grade the search and the answer apart.",
+        "Writes code: run tests, and look at pass@k.",
+        "Writes for people: an AI judge, with the order swapped and checked against you.",
+        "Is an agent: check the end state and the path, and run each task more than once."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Then match the effort to the stakes. A joke writer needs a light check. An app that gives advice needs a person reading samples. In hiring, school admission and credit, the EU AI Act calls a system high-risk and requires that people can oversee it."
+    },
+    {
+      "type": "p",
+      "text": "And stack the layers: cheap code checks on every response, a judge on a sample, and you on a smaller sample."
+    },
+    {
+      "type": "h2",
+      "text": "What to do this week"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Write your app's job in one line.",
+        "Pick the grader that fits it.",
+        "Collect ten real cases where your AI got it wrong, or nearly wrong. That is your first test set. Grow it toward twenty to fifty.",
+        "Run it after every change.",
+        "Add a case every time a user finds a failure."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "That is an eval. I'd change my mind about benchmarks for one kind: a benchmark built from tasks like yours, graded by someone who didn't make the model."
+    },
+    {
+      "type": "p",
+      "text": "An eval tests a model. To test a headline *about* AI, see the [AI bubble post](https://hilaytrivedi.github.io/blog/post.html?p=is-the-ai-bubble-bursting)."
+    },
+    {
+      "type": "h2",
+      "text": "Sources"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "OpenAI, \"Why we no longer evaluate SWE-bench Verified\" (2026-02-23) and \"Separating signal from noise in coding evaluations\" (2026-07-08)",
+        "OpenAI, LifeVal (2026-11-02)",
+        "Zheng et al., [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena](https://arxiv.org/abs/2306.05685) (2023)",
+        "Chen et al., [Evaluating Large Language Models Trained on Code](https://arxiv.org/abs/2107.03374) (2021)",
+        "[τ-bench](https://arxiv.org/abs/2406.12045) (2024)",
+        "Zhang et al. (Scale AI), [A Careful Examination of LLM Performance on Grade School Arithmetic](https://arxiv.org/abs/2405.00332) (2024)",
+        "[Ragas](https://arxiv.org/abs/2309.15217) (2023) and [DeepEval](https://github.com/confident-ai/deepeval)",
+        "Anthropic, [Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) (2026-01-09)",
+        "[EU AI Act, Article 14](https://artificialintelligenceact.eu/article/14/)"
+      ]
+    }
+  ]
+}

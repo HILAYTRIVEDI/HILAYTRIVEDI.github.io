@@ -26,5 +26,16 @@
     <category>llm</category>
     <category>claude</category>
   </item>
+  <item>
+    <title>AI evals explained: how to test your AI app</title>
+    <link>https://hilaytrivedi.github.io/blog/post.html?p=ai-evals-explained-how-to-test-your-ai-app</link>
+    <guid isPermaLink="false">ai-evals-explained-how-to-test-your-ai-app</guid>
+    <pubDate>Sat, 07 Nov 2026 00:00:00 +0000</pubDate>
+    <description>A benchmark score tells you what to try, not what to ship. Here are the five ways AI gets graded, how to grade a search app and an agent, and the routine that turns it into a one-page eval plan for your own app.</description>
+    <category>ai</category>
+    <category>evals</category>
+    <category>testing</category>
+    <category>llm</category>
+  </item>
 </channel>
 </rss>
