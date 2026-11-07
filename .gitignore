@@ -3,3 +3,5 @@ tools/.venv/
 __pycache__/
 .tmp_build/
 .tmp_enc/
+editor/
+.tmp_editor/
